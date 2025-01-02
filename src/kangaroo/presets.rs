@@ -24,6 +24,7 @@ pub const PARAMETERS_48: Parameters = Parameters {
     secret_size: 48,
 };
 
+// TODO: Add features so that the user can choose which preset to use.
 pub const KANGAROO_16: &[u8] = include_bytes!("rsc/table_16");
 pub const KANGAROO_32: &[u8] = include_bytes!("rsc/table_32");
 pub const KANGAROO_48: &[u8] = include_bytes!("rsc/table_48");

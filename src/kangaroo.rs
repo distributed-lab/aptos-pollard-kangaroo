@@ -37,6 +37,7 @@ pub struct Parameters {
 
 impl Kangaroo {
     pub fn from_table(parameters: Parameters, table: Table) -> Kangaroo {
+        // TODO: Add checks that the passed parameters are correct.
         Kangaroo { parameters, table }
     }
 
