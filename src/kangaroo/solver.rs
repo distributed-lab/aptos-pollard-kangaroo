@@ -3,9 +3,12 @@ use crate::utils;
 
 use curve25519_dalek_ng::{constants::RISTRETTO_BASEPOINT_POINT, ristretto::RistrettoPoint};
 use std::ops::{Add, AddAssign, Mul, Sub};
+use std::time::Instant;
 
 impl Kangaroo {
-    pub fn solve_dlp(&self, pk: &RistrettoPoint) -> u64 {
+    pub fn solve_dlp(&self, pk: &RistrettoPoint, max_time: Option<u128>) -> Option<u64> {
+        let start_time = max_time.map(|_| Instant::now());
+
         loop {
             // wdist = r + slog_1 + slog_2 ...
             let mut wdist = utils::generate_random_scalar(self.parameters.secret_size - 8);
@@ -22,7 +25,7 @@ impl Kangaroo {
 
                         assert!(RISTRETTO_BASEPOINT_POINT.mul(sk).eq(pk));
 
-                        return utils::scalar_to_u64(&sk);
+                        return Some(utils::scalar_to_u64(&sk));
                     }
 
                     break;
@@ -32,6 +35,12 @@ impl Kangaroo {
 
                 wdist.add_assign(&self.table.slog[h]);
                 w.add_assign(&self.table.s[h]);
+
+                if let Some(max_time) = max_time {
+                    if start_time.unwrap().elapsed().as_millis() >= max_time {
+                        return None;
+                    }
+                }
             }
         }
     }

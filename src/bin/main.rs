@@ -21,10 +21,12 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
         println!("secret key: {:x?}", sk.to_bytes());
         println!("public key: {:x?}", pk.compress().as_bytes());
 
-        let expected_sk = kangaroo.solve_dlp(&pk);
-
-        println!("expected secret key: {:?}", expected_sk);
-        println!("actual secret key: {:?}", utils::scalar_to_u64(&sk));
+        if let Some(expected_sk) = kangaroo.solve_dlp(&pk, Some(1000)) {
+            println!("expected secret key: {:?}", expected_sk);
+            println!("actual secret key: {:?}", utils::scalar_to_u64(&sk));
+        } else {
+            println!("we're out of time :(");
+        }
 
         let elapsed = now.elapsed();
 
