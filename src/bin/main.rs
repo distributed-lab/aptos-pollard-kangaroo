@@ -25,7 +25,7 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
             println!("expected secret key: {:?}", expected_sk);
             println!("actual secret key: {:?}", utils::scalar_to_u64(&sk));
         } else {
-            println!("we're out of time :(");
+            println!("run out of time");
         }
 
         let elapsed = now.elapsed();

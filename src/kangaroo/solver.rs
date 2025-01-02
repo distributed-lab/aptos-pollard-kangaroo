@@ -31,16 +31,16 @@ impl Kangaroo {
                     break;
                 }
 
+                if let Some(max_time) = max_time {
+                    if start_time.unwrap().elapsed() >= Duration::from_millis(max_time) {
+                        return None;
+                    }
+                }
+
                 let h = kangaroo::hash(&w_compressed, &self.parameters) as usize;
 
                 wdist.add_assign(&self.table.slog[h]);
                 w.add_assign(&self.table.s[h]);
-            }
-
-            if let Some(max_time) = max_time {
-                if start_time.unwrap().elapsed() >= Duration::from_millis(max_time) {
-                    return None;
-                }
             }
         }
     }
