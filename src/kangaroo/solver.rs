@@ -3,10 +3,10 @@ use crate::utils;
 
 use curve25519_dalek_ng::{constants::RISTRETTO_BASEPOINT_POINT, ristretto::RistrettoPoint};
 use std::ops::{Add, AddAssign, Mul, Sub};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 impl Kangaroo {
-    pub fn solve_dlp(&self, pk: &RistrettoPoint, max_time: Option<u128>) -> Option<u64> {
+    pub fn solve_dlp(&self, pk: &RistrettoPoint, max_time: Option<u64>) -> Option<u64> {
         let start_time = max_time.map(|_| Instant::now());
 
         loop {
@@ -35,11 +35,11 @@ impl Kangaroo {
 
                 wdist.add_assign(&self.table.slog[h]);
                 w.add_assign(&self.table.s[h]);
+            }
 
-                if let Some(max_time) = max_time {
-                    if start_time.unwrap().elapsed().as_millis() >= max_time {
-                        return None;
-                    }
+            if let Some(max_time) = max_time {
+                if start_time.unwrap().elapsed() >= Duration::from_millis(max_time) {
+                    return None;
                 }
             }
         }
