@@ -1,64 +1,84 @@
 #![allow(non_snake_case)]
 
-use anyhow::Result;
+pub mod generator;
+pub mod presets;
+pub mod solver;
+
+use anyhow::{Context, Result};
 use curve25519_dalek_ng::ristretto::{CompressedRistretto, RistrettoPoint};
 use curve25519_dalek_ng::scalar::Scalar;
+use serde::{Deserialize, Serialize};
+use serde_with::serde_as;
 use std::collections::HashMap;
 
+#[derive(Serialize, Deserialize)]
 pub struct Kangaroo {
-    pub(crate) s: Vec<RistrettoPoint>,
-    pub(crate) slog: Vec<Scalar>,
-    pub(crate) table: HashMap<CompressedRistretto, Scalar>,
+    pub parameters: Parameters,
+    pub table: Table,
+}
+
+#[serde_as]
+#[derive(Serialize, Deserialize)]
+pub struct Table {
+    pub s: Vec<RistrettoPoint>,
+    pub slog: Vec<Scalar>,
+    #[serde_as(as = "Vec<(_, _)>")]
+    pub table: HashMap<CompressedRistretto, Scalar>,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Parameters {
+    pub i: u64,
+    pub W: u64,
+    pub N: u64,
+    pub R: u64,
+    pub secret_size: u8,
 }
 
 impl Kangaroo {
-    pub fn new(
-        s: Vec<RistrettoPoint>,
-        slog: Vec<Scalar>,
-        table: Vec<(CompressedRistretto, Scalar)>,
-    ) -> Kangaroo {
-        let mut t = HashMap::new();
-
-        table.into_iter().for_each(|(point, value)| {
-            t.insert(point, value);
-        });
-
-        Kangaroo { s, slog, table: t }
+    pub fn from_table(parameters: Parameters, table: Table) -> Kangaroo {
+        Kangaroo { parameters, table }
     }
 
-    // fn s(&self, idx: usize) -> Result<&CompressedRistretto> {
-    //     self.s
-    //         .get(idx)
-    //         .ok_or_else(|| anyhow::anyhow!("out of bounds"))
-    // }
-    //
-    // fn slog(&self, idx: usize) -> Result<&Scalar> {
-    //     self.slog
-    //         .get(idx)
-    //         .ok_or_else(|| anyhow::anyhow!("out of bounds"))
-    // }
-    //
-    // fn value(&self, point: &CompressedRistretto) -> Option<&Scalar> {
-    //     self.table.get(point)
-    // }
+    pub fn from_parameters(parameters: Parameters) -> Kangaroo {
+        let table = Table::generate(&parameters);
+
+        Kangaroo { parameters, table }
+    }
+
+    pub fn from_secret_size(secret_size: u8) -> Result<Kangaroo> {
+        let kangaroo_bytes = match secret_size {
+            1..=16 => presets::KANGAROO_16,
+            17..=32 => presets::KANGAROO_32,
+            33..=48 => presets::KANGAROO_48,
+            _ => return Err(anyhow::anyhow!("invalid secret size")),
+        };
+
+        let kangaroo =
+            bincode::deserialize(kangaroo_bytes).with_context(|| "failed to deserialize table")?;
+
+        Ok(kangaroo)
+    }
 }
 
-pub fn hash(point: &CompressedRistretto, r: u64) -> usize {
-    let point = point_to_u64(point);
-    (point & (r - 1)) as usize
+fn is_distinguished(compressed_point: &CompressedRistretto, parameters: &Parameters) -> bool {
+    let point_bytes = get_last_point_bytes(compressed_point);
+
+    (point_bytes & (parameters.W - 1)) == 0
 }
 
-pub fn is_distinguished(point: &CompressedRistretto, w: u64) -> bool {
-    let point = point_to_u64(point);
-    (point & (w - 1)) == 0
+fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> u64 {
+    let point_bytes = get_last_point_bytes(compressed_point);
+
+    point_bytes & (parameters.R - 1)
 }
 
-pub fn point_to_u64(p: &CompressedRistretto) -> u64 {
-    let (_, u64_bytes) = p.as_bytes().split_at(32 - size_of::<u64>());
-    u64::from_be_bytes(u64_bytes.try_into().unwrap())
-}
+fn get_last_point_bytes(compressed_point: &CompressedRistretto) -> u64 {
+    let (_, point_bytes) = compressed_point.as_bytes().split_at(32 - size_of::<u64>());
 
-pub fn scalar_to_u64(s: &Scalar) -> u64 {
-    let (u64_bytes, _) = s.as_bytes().split_at(size_of::<u64>());
-    u64::from_le_bytes(u64_bytes.try_into().unwrap())
+    u64::from_be_bytes(
+        point_bytes
+            .try_into()
+            .unwrap_or_else(|e| panic!("Failed to convert point to u64: {:?}", e)),
+    )
 }

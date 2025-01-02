@@ -1,54 +1,45 @@
-#![allow(non_snake_case)]
-
-use std::time::Instant;
-use anyhow::{anyhow, Result};
-use pollard_kangaroo::generator::Generator;
 use pollard_kangaroo::kangaroo::Kangaroo;
-use pollard_kangaroo::solver::Solver;
-use pollard_kangaroo::{kangaroo, utils};
+use pollard_kangaroo::utils;
+
+use anyhow::Result;
+use std::time::Instant;
 
 fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
-    let (i, W, N, R) = match secret_size {
-        16 => (8, 8, 8000, 64),
-        32 => (8, 2048, 4000, 128),
-        48 => (8, 65536, 40000, 128),
-        _ => return Err(anyhow!("unsupported secret_size")),
-    };
-
-    let kangaroo = Kangaroo::generate(i, W, N, R, secret_size);
+    let kangaroo = Kangaroo::from_secret_size(secret_size)?;
 
     let mut time = 0;
 
-    for _ in 0..secrets_count {
+    for i in 0..secrets_count {
         let now = Instant::now();
 
         let (sk, pk) = utils::generate_keypair(secret_size);
 
-        println!("Secret key: {:?}", hex::encode(&sk.to_bytes()));
-        println!("Public key: {:?}", hex::encode(&pk.as_bytes()));
-        println!("Public key compressed: {:?}", &pk.as_bytes());
+        println!("------------------");
+        println!("test #{}", i + 1);
+        println!("------------------");
 
-        let expected_sk = kangaroo.solve_dlp(&pk.decompress().unwrap(), i, W, R, secret_size);
+        println!("secret key: {:x?}", sk.to_bytes());
+        println!("public key: {:x?}", pk.compress().as_bytes());
 
-        println!("Expected secret key: {:?}", expected_sk);
-        println!("Actual secret key: {:?}", kangaroo::scalar_to_u64(&sk));
+        let expected_sk = kangaroo.solve_dlp(&pk);
+
+        println!("expected secret key: {:?}", expected_sk);
+        println!("actual secret key: {:?}", utils::scalar_to_u64(&sk));
 
         let elapsed = now.elapsed();
 
-        println!("Elapsed: {:.2?}", elapsed.as_millis());
+        println!("elapsed: {:.2?}\n", elapsed.as_millis());
 
         time += elapsed.as_millis();
     }
 
-    println!("Average time: {:.2?}", time as f64 / secrets_count as f64);
+    println!("average time: {:.2?}", time as f64 / secrets_count as f64);
 
     Ok(())
 }
 
 fn main() -> Result<()> {
-    test(32, 200)?;
-    //test(16, 200)?;
+    test(48, 10)?;
 
     Ok(())
 }
-
