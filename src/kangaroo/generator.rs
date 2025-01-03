@@ -10,6 +10,10 @@ use std::ops::{AddAssign, Mul};
 
 impl Table {
     pub fn generate(parameters: &Parameters) -> Result<Table> {
+        if parameters.secret_size < 8 || parameters.secret_size > 64 {
+            return Err(anyhow::anyhow!("secret size must be between 8 and 64"));
+        }
+
         let (slog, s) = Self::s_values_init(parameters)?;
 
         let mut table = HashMap::new();
