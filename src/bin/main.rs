@@ -2,10 +2,11 @@ use pollard_kangaroo::kangaroo::Kangaroo;
 use pollard_kangaroo::utils;
 
 use anyhow::Result;
+use pollard_kangaroo::kangaroo::presets::Presets;
 use std::time::Instant;
 
 fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
-    let kangaroo = Kangaroo::from_secret_size(secret_size)?;
+    let kangaroo = Kangaroo::from_preset(Presets::Kangaroo48(secret_size))?;
 
     let mut time = 0;
 
