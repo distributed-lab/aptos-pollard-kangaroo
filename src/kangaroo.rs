@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 
 pub mod generator;
-#[cfg(any(feature = "table16", feature = "table32", feature = "table48"))]
+#[cfg(feature = "presets")]
 pub mod presets;
 pub mod solver;
 
@@ -48,11 +48,14 @@ impl Kangaroo {
         Ok(Kangaroo { parameters, table })
     }
 
-    #[cfg(any(feature = "table16", feature = "table32", feature = "table48"))]
+    #[cfg(feature = "presets")]
     pub fn from_preset(preset: Presets) -> Result<Kangaroo> {
         let (kangaroo_bytes, secret_size) = match preset {
+            #[cfg(feature = "table16")]
             Presets::Kangaroo16(secret_size) => (presets::KANGAROO_16, secret_size),
+            #[cfg(feature = "table32")]
             Presets::Kangaroo32(secret_size) => (presets::KANGAROO_32, secret_size),
+            #[cfg(feature = "table48")]
             Presets::Kangaroo48(secret_size) => (presets::KANGAROO_48, secret_size),
         };
 
