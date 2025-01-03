@@ -2,11 +2,11 @@ use crate::kangaroo::Parameters;
 
 pub enum Presets {
     #[cfg(feature = "table16")]
-    Kangaroo16(u8),
+    Kangaroo16,
     #[cfg(feature = "table32")]
-    Kangaroo32(u8),
+    Kangaroo32,
     #[cfg(feature = "table48")]
-    Kangaroo48(u8),
+    Kangaroo48,
 }
 
 #[cfg(feature = "table16")]

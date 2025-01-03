@@ -50,21 +50,17 @@ impl Kangaroo {
 
     #[cfg(feature = "presets")]
     pub fn from_preset(preset: Presets) -> Result<Kangaroo> {
-        let (kangaroo_bytes, secret_size) = match preset {
+        let kangaroo_bytes = match preset {
             #[cfg(feature = "table16")]
-            Presets::Kangaroo16(secret_size) => (presets::KANGAROO_16, secret_size),
+            Presets::Kangaroo16 => presets::KANGAROO_16,
             #[cfg(feature = "table32")]
-            Presets::Kangaroo32(secret_size) => (presets::KANGAROO_32, secret_size),
+            Presets::Kangaroo32 => presets::KANGAROO_32,
             #[cfg(feature = "table48")]
-            Presets::Kangaroo48(secret_size) => (presets::KANGAROO_48, secret_size),
+            Presets::Kangaroo48 => presets::KANGAROO_48,
         };
 
         let kangaroo: Kangaroo =
             bincode::deserialize(kangaroo_bytes).context("failed to deserialize table")?;
-
-        if kangaroo.parameters.secret_size < secret_size {
-            return Err(anyhow::anyhow!("large secret size"));
-        }
 
         Ok(kangaroo)
     }
