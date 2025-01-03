@@ -41,7 +41,7 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    test(48, 10)?;
+    test(32, 200)?;
 
     Ok(())
 }

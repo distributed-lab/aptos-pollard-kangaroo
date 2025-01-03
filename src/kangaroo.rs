@@ -42,7 +42,7 @@ impl Kangaroo {
     }
 
     pub fn from_parameters(parameters: Parameters) -> Result<Kangaroo> {
-        let table = Table::generate(&parameters)?;
+        let table = Table::generate(&parameters).context("failed to generate table")?;
 
         Ok(Kangaroo { parameters, table })
     }
@@ -56,26 +56,29 @@ impl Kangaroo {
         };
 
         let kangaroo =
-            bincode::deserialize(kangaroo_bytes).with_context(|| "failed to deserialize table")?;
+            bincode::deserialize(kangaroo_bytes).context("failed to deserialize table")?;
 
         Ok(kangaroo)
     }
 }
 
-fn is_distinguished(compressed_point: &CompressedRistretto, parameters: &Parameters) -> bool {
-    let point_bytes = get_last_point_bytes(compressed_point);
+fn is_distinguished(
+    compressed_point: &CompressedRistretto,
+    parameters: &Parameters,
+) -> Result<bool> {
+    let point_bytes = get_last_point_bytes(compressed_point)?;
 
-    (point_bytes & (parameters.W - 1)) == 0
+    Ok((point_bytes & (parameters.W - 1)) == 0)
 }
 
-fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> u64 {
-    let point_bytes = get_last_point_bytes(compressed_point);
+fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> Result<u64> {
+    let point_bytes = get_last_point_bytes(compressed_point)?;
 
-    point_bytes & (parameters.R - 1)
+    Ok(point_bytes & (parameters.R - 1))
 }
 
-fn get_last_point_bytes(compressed_point: &CompressedRistretto) -> u64 {
+fn get_last_point_bytes(compressed_point: &CompressedRistretto) -> Result<u64> {
     let (_, point_bytes) = compressed_point.as_bytes().split_at(32 - size_of::<u64>());
 
-    u64::from_be_bytes(point_bytes.try_into().unwrap())
+    Ok(u64::from_be_bytes(point_bytes.try_into()?))
 }

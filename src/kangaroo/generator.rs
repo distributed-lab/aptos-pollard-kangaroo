@@ -1,7 +1,7 @@
 use crate::kangaroo::{self, Parameters, Table};
 use crate::utils;
 
-use anyhow::Result;
+use anyhow::{Context, Result};
 use curve25519_dalek_ng::{
     constants::RISTRETTO_BASEPOINT_POINT, ristretto::RistrettoPoint, scalar::Scalar,
 };
@@ -15,19 +15,20 @@ impl Table {
         let mut table = HashMap::new();
 
         while table.len() < parameters.N as usize {
-            let mut wlog = utils::generate_random_scalar(parameters.secret_size)?;
+            let mut wlog = utils::generate_random_scalar(parameters.secret_size)
+                .context("failed to generate `wlog` scalar")?;
             let mut w = RISTRETTO_BASEPOINT_POINT.mul(wlog);
 
             for _ in 0..parameters.i * parameters.W {
                 let w_compressed = w.compress();
 
-                if kangaroo::is_distinguished(&w_compressed, parameters) {
+                if kangaroo::is_distinguished(&w_compressed, parameters)? {
                     table.insert(w_compressed, wlog);
 
                     break;
                 }
 
-                let h = kangaroo::hash(&w_compressed, parameters) as usize;
+                let h = kangaroo::hash(&w_compressed, parameters)? as usize;
 
                 wlog.add_assign(slog[h]);
                 w.add_assign(s[h]);
@@ -44,7 +45,8 @@ impl Table {
         let mut points = Vec::with_capacity(parameters.R as usize);
 
         for _ in 0..parameters.R {
-            let slog = utils::generate_random_scalar(slog_size)?;
+            let slog = utils::generate_random_scalar(slog_size)
+                .context("failed to generate `slog` scalar")?;
             let s = RISTRETTO_BASEPOINT_POINT.mul(slog);
 
             scalars.push(slog);
