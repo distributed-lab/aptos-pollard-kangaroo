@@ -21,7 +21,7 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
         println!("secret key: {:x?}", sk.to_bytes());
         println!("public key: {:x?}", pk.compress().as_bytes());
 
-        if let Some(expected_sk) = kangaroo.solve_dlp(&pk, Some(2000)) {
+        if let Some(expected_sk) = kangaroo.solve_dlp(&pk, Some(2000))? {
             println!("expected secret key: {:?}", expected_sk);
             println!("actual secret key: {:?}", utils::scalar_to_u64(&sk)?);
         } else {

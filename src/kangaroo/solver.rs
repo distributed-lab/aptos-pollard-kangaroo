@@ -1,17 +1,18 @@
 use crate::kangaroo::{self, Kangaroo};
 use crate::utils;
 
+use anyhow::Result;
 use curve25519_dalek_ng::{constants::RISTRETTO_BASEPOINT_POINT, ristretto::RistrettoPoint};
 use std::ops::{Add, AddAssign, Mul, Sub};
 use std::time::{Duration, Instant};
 
 impl Kangaroo {
-    pub fn solve_dlp(&self, pk: &RistrettoPoint, max_time: Option<u64>) -> Option<u64> {
+    pub fn solve_dlp(&self, pk: &RistrettoPoint, max_time: Option<u64>) -> Result<Option<u64>> {
         let start_time = max_time.map(|_| Instant::now());
 
         loop {
             // wdist = r + slog_1 + slog_2 ...
-            let mut wdist = utils::generate_random_scalar(self.parameters.secret_size - 8).unwrap();
+            let mut wdist = utils::generate_random_scalar(self.parameters.secret_size - 8)?;
             // w = sk * G + r * G + slog_1 * G + slog_2 * G ... = sk * G + wdist * G
             let mut w = pk.add(RISTRETTO_BASEPOINT_POINT.mul(wdist));
 
@@ -25,7 +26,7 @@ impl Kangaroo {
 
                         assert!(RISTRETTO_BASEPOINT_POINT.mul(sk).eq(pk));
 
-                        return Some(utils::scalar_to_u64(&sk).unwrap());
+                        return Ok(Some(utils::scalar_to_u64(&sk)?));
                     }
 
                     break;
@@ -33,7 +34,7 @@ impl Kangaroo {
 
                 if let Some(max_time) = max_time {
                     if start_time.unwrap().elapsed() >= Duration::from_millis(max_time) {
-                        return None;
+                        return Ok(None);
                     }
                 }
 
