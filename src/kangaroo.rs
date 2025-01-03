@@ -77,9 +77,5 @@ fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> u64 
 fn get_last_point_bytes(compressed_point: &CompressedRistretto) -> u64 {
     let (_, point_bytes) = compressed_point.as_bytes().split_at(32 - size_of::<u64>());
 
-    u64::from_be_bytes(
-        point_bytes
-            .try_into()
-            .unwrap_or_else(|e| panic!("Failed to convert point to u64: {:?}", e)),
-    )
+    u64::from_be_bytes(point_bytes.try_into().unwrap())
 }

@@ -12,7 +12,7 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
     for i in 0..secrets_count {
         let now = Instant::now();
 
-        let (sk, pk) = utils::generate_keypair(secret_size);
+        let (sk, pk) = utils::generate_keypair(secret_size)?;
 
         println!("------------------");
         println!("test #{}", i + 1);
@@ -21,9 +21,9 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
         println!("secret key: {:x?}", sk.to_bytes());
         println!("public key: {:x?}", pk.compress().as_bytes());
 
-        if let Some(expected_sk) = kangaroo.solve_dlp(&pk, Some(1000)) {
+        if let Some(expected_sk) = kangaroo.solve_dlp(&pk, Some(2000)) {
             println!("expected secret key: {:?}", expected_sk);
-            println!("actual secret key: {:?}", utils::scalar_to_u64(&sk));
+            println!("actual secret key: {:?}", utils::scalar_to_u64(&sk)?);
         } else {
             println!("run out of time");
         }

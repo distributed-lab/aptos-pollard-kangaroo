@@ -11,7 +11,7 @@ impl Kangaroo {
 
         loop {
             // wdist = r + slog_1 + slog_2 ...
-            let mut wdist = utils::generate_random_scalar(self.parameters.secret_size - 8);
+            let mut wdist = utils::generate_random_scalar(self.parameters.secret_size - 8).unwrap();
             // w = sk * G + r * G + slog_1 * G + slog_2 * G ... = sk * G + wdist * G
             let mut w = pk.add(RISTRETTO_BASEPOINT_POINT.mul(wdist));
 
@@ -25,7 +25,7 @@ impl Kangaroo {
 
                         assert!(RISTRETTO_BASEPOINT_POINT.mul(sk).eq(pk));
 
-                        return Some(utils::scalar_to_u64(&sk));
+                        return Some(utils::scalar_to_u64(&sk).unwrap());
                     }
 
                     break;

@@ -14,7 +14,7 @@ impl Table {
         let mut table = HashMap::new();
 
         while table.len() < parameters.N as usize {
-            let mut wlog = utils::generate_random_scalar(parameters.secret_size);
+            let mut wlog = utils::generate_random_scalar(parameters.secret_size).unwrap();
             let mut w = RISTRETTO_BASEPOINT_POINT.mul(wlog);
 
             for _ in 0..parameters.i * parameters.W {
@@ -41,7 +41,7 @@ impl Table {
 
         (0..parameters.R)
             .map(|_| {
-                let slog = utils::generate_random_scalar(slog_size);
+                let slog = utils::generate_random_scalar(slog_size).unwrap();
                 let s = RISTRETTO_BASEPOINT_POINT.mul(slog);
 
                 (slog, s)
