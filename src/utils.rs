@@ -24,10 +24,10 @@ pub fn generate_random_scalar(bits: u8) -> Result<Scalar> {
 }
 
 /// Converts a scalar to an u64.
-pub fn scalar_to_u64(scalar: &Scalar) -> Result<u64> {
+pub fn scalar_to_u64(scalar: &Scalar) -> u64 {
     let (u64_bytes, _) = scalar.as_bytes().split_at(size_of::<u64>());
 
-    Ok(u64::from_le_bytes(u64_bytes.try_into()?))
+    u64::from_le_bytes(u64_bytes.try_into().unwrap())
 }
 
 /// Generates a random scalar and its corresponding "public key".

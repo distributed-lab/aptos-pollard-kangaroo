@@ -62,23 +62,20 @@ impl Kangaroo {
     }
 }
 
-fn is_distinguished(
-    compressed_point: &CompressedRistretto,
-    parameters: &Parameters,
-) -> Result<bool> {
-    let point_bytes = get_last_point_bytes(compressed_point)?;
+fn is_distinguished(compressed_point: &CompressedRistretto, parameters: &Parameters) -> bool {
+    let point_bytes = get_last_point_bytes(compressed_point);
 
-    Ok((point_bytes & (parameters.W - 1)) == 0)
+    (point_bytes & (parameters.W - 1)) == 0
 }
 
-fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> Result<u64> {
-    let point_bytes = get_last_point_bytes(compressed_point)?;
+fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> u64 {
+    let point_bytes = get_last_point_bytes(compressed_point);
 
-    Ok(point_bytes & (parameters.R - 1))
+    point_bytes & (parameters.R - 1)
 }
 
-fn get_last_point_bytes(compressed_point: &CompressedRistretto) -> Result<u64> {
+fn get_last_point_bytes(compressed_point: &CompressedRistretto) -> u64 {
     let (_, point_bytes) = compressed_point.as_bytes().split_at(32 - size_of::<u64>());
 
-    Ok(u64::from_be_bytes(point_bytes.try_into()?))
+    u64::from_be_bytes(point_bytes.try_into().unwrap())
 }

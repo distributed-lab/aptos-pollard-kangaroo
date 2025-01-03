@@ -23,7 +23,7 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
 
         if let Some(expected_sk) = kangaroo.solve_dlp(&pk, Some(2000))? {
             println!("expected secret key: {:?}", expected_sk);
-            println!("actual secret key: {:?}", utils::scalar_to_u64(&sk)?);
+            println!("actual secret key: {:?}", utils::scalar_to_u64(&sk));
         } else {
             println!("run out of time");
         }
