@@ -41,15 +41,15 @@ impl Kangaroo {
         Kangaroo { parameters, table }
     }
 
-    pub fn from_parameters(parameters: Parameters) -> Kangaroo {
-        let table = Table::generate(&parameters);
+    pub fn from_parameters(parameters: Parameters) -> Result<Kangaroo> {
+        let table = Table::generate(&parameters)?;
 
-        Kangaroo { parameters, table }
+        Ok(Kangaroo { parameters, table })
     }
 
     pub fn from_secret_size(secret_size: u8) -> Result<Kangaroo> {
         let kangaroo_bytes = match secret_size {
-            1..=16 => presets::KANGAROO_16,
+            8..=16 => presets::KANGAROO_16,
             17..=32 => presets::KANGAROO_32,
             33..=48 => presets::KANGAROO_48,
             _ => return Err(anyhow::anyhow!("invalid secret size")),

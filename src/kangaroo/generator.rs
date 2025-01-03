@@ -1,6 +1,7 @@
 use crate::kangaroo::{self, Parameters, Table};
 use crate::utils;
 
+use anyhow::Result;
 use curve25519_dalek_ng::{
     constants::RISTRETTO_BASEPOINT_POINT, ristretto::RistrettoPoint, scalar::Scalar,
 };
@@ -8,13 +9,13 @@ use std::collections::HashMap;
 use std::ops::{AddAssign, Mul};
 
 impl Table {
-    pub fn generate(parameters: &Parameters) -> Table {
-        let (slog, s) = Self::s_values_init(parameters);
+    pub fn generate(parameters: &Parameters) -> Result<Table> {
+        let (slog, s) = Self::s_values_init(parameters)?;
 
         let mut table = HashMap::new();
 
         while table.len() < parameters.N as usize {
-            let mut wlog = utils::generate_random_scalar(parameters.secret_size).unwrap();
+            let mut wlog = utils::generate_random_scalar(parameters.secret_size)?;
             let mut w = RISTRETTO_BASEPOINT_POINT.mul(wlog);
 
             for _ in 0..parameters.i * parameters.W {
@@ -33,19 +34,23 @@ impl Table {
             }
         }
 
-        Table { s, slog, table }
+        Ok(Table { s, slog, table })
     }
 
-    fn s_values_init(parameters: &Parameters) -> (Vec<Scalar>, Vec<RistrettoPoint>) {
+    fn s_values_init(parameters: &Parameters) -> Result<(Vec<Scalar>, Vec<RistrettoPoint>)> {
         let slog_size = ((1 << (parameters.secret_size as u64 - 2)) / parameters.W).ilog2() as u8;
 
-        (0..parameters.R)
-            .map(|_| {
-                let slog = utils::generate_random_scalar(slog_size).unwrap();
-                let s = RISTRETTO_BASEPOINT_POINT.mul(slog);
+        let mut scalars = Vec::with_capacity(parameters.R as usize);
+        let mut points = Vec::with_capacity(parameters.R as usize);
 
-                (slog, s)
-            })
-            .collect()
+        for _ in 0..parameters.R {
+            let slog = utils::generate_random_scalar(slog_size)?;
+            let s = RISTRETTO_BASEPOINT_POINT.mul(slog);
+
+            scalars.push(slog);
+            points.push(s);
+        }
+
+        Ok((scalars, points))
     }
 }
