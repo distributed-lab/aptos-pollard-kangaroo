@@ -4,7 +4,7 @@ use crate::utils;
 use anyhow::{Context, Result};
 use curve25519_dalek_ng::{constants::RISTRETTO_BASEPOINT_POINT, ristretto::RistrettoPoint};
 use std::ops::{Add, AddAssign, Mul, Sub};
-use std::time::{Duration, Instant};
+use web_time::{Duration, Instant};
 
 impl Kangaroo {
     pub fn solve_dlp(&self, pk: &RistrettoPoint, max_time: Option<u64>) -> Result<Option<u64>> {
