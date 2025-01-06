@@ -5,7 +5,7 @@ pub mod generator;
 pub mod presets;
 pub mod solver;
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "presets")]
 use crate::kangaroo::presets::Presets;
 
 use anyhow::{Context, Result};

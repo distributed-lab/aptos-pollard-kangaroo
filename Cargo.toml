@@ -7,9 +7,9 @@ edition = "2021"
 default = []
 serde = ["dep:serde", "dep:serde_with"]
 presets = ["serde", "dep:bincode"]
-table16 = ["presets", "serde"]
-table32 = ["presets", "serde"]
-table48 = ["presets", "serde"]
+table16 = ["presets"]
+table32 = ["presets"]
+table48 = ["presets"]
 
 [dependencies]
 curve25519-dalek-ng = { version = "4", features = ["serde"] }
