@@ -5,8 +5,8 @@ use anyhow::Result;
 use pollard_kangaroo::kangaroo::presets::Presets;
 use std::time::Instant;
 
-fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
-    let kangaroo = Kangaroo::from_preset(Presets::Kangaroo32)?;
+fn test(secret_size: u8, secrets_count: u32, preset: Presets) -> Result<()> {
+    let kangaroo = Kangaroo::from_preset(preset)?;
 
     let mut time = 0;
 
@@ -42,7 +42,7 @@ fn test(secret_size: u8, secrets_count: u32) -> Result<()> {
 }
 
 fn main() -> Result<()> {
-    test(32, 200)?;
+    test(32, 200, Presets::Kangaroo32)?;
 
     Ok(())
 }
