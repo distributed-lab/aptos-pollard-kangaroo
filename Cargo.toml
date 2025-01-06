@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = []
+default = ["table16", "table32", "table48"]
 serde = ["dep:serde", "dep:serde_with"]
 presets = ["serde", "dep:bincode"]
 table16 = ["presets"]
@@ -23,11 +23,6 @@ web-time = { version = "1.1" }
 [dev-dependencies]
 criterion = "0.5"
 
-[[bin]]
-name = "main"
-required-features = ["table16", "table32", "table48"]
-
 [[bench]]
 name = "kangaroo"
 harness = false
-required-features = ["table16", "table32", "table48"]

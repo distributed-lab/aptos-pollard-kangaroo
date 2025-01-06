@@ -1,5 +1,6 @@
 use criterion::{criterion_group, criterion_main, BatchSize, Criterion};
-use pollard_kangaroo::kangaroo::{presets::Presets, Kangaroo};
+use pollard_kangaroo::kangaroo::presets::Presets;
+use pollard_kangaroo::kangaroo::Kangaroo;
 use pollard_kangaroo::utils;
 
 fn bench_kangaroo16(c: &mut Criterion) {
@@ -50,7 +51,7 @@ criterion_group! {
 }
 criterion_group! {
     name = kangaroo48_group;
-    config = Criterion::default().sample_size(20);
+    config = Criterion::default().sample_size(10);
     targets = bench_kangaroo48
 }
 criterion_main!(kangaroo16_group, kangaroo32_group, kangaroo48_group);
