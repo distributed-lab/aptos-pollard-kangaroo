@@ -49,20 +49,8 @@ impl Kangaroo {
     }
 
     #[cfg(feature = "presets")]
-    pub fn from_preset(preset: Presets) -> Result<Kangaroo> {
-        let kangaroo_bytes = match preset {
-            #[cfg(feature = "table16")]
-            Presets::Kangaroo16 => presets::KANGAROO_16,
-            #[cfg(feature = "table32")]
-            Presets::Kangaroo32 => presets::KANGAROO_32,
-            #[cfg(feature = "table48")]
-            Presets::Kangaroo48 => presets::KANGAROO_48,
-        };
-
-        let kangaroo: Kangaroo =
-            bincode::deserialize(kangaroo_bytes).context("failed to deserialize table")?;
-
-        Ok(kangaroo)
+    pub fn from_preset(preset: Presets) -> Result<&'static Kangaroo> {
+        Ok(&presets::KANGAROO_48)
     }
 }
 

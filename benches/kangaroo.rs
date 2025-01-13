@@ -39,6 +39,21 @@ fn bench_kangaroo48(c: &mut Criterion) {
     });
 }
 
+fn bench_setup(c: &mut Criterion) {
+    c.bench_function("48-bit secrets", |b| {
+        b.iter_batched(
+            || utils::generate_keypair(48).unwrap(),
+            |(_sk, pk)| Kangaroo::from_preset(Presets::Kangaroo48).unwrap(),
+            BatchSize::SmallInput,
+        )
+    });
+}
+
+criterion_group! {
+    name = setup;
+    config = Criterion::default().sample_size(200);
+    targets = bench_setup
+}
 criterion_group! {
     name = kangaroo16_group;
     config = Criterion::default().sample_size(200);
@@ -54,4 +69,4 @@ criterion_group! {
     config = Criterion::default().sample_size(10);
     targets = bench_kangaroo48
 }
-criterion_main!(kangaroo16_group, kangaroo32_group, kangaroo48_group);
+criterion_main!(setup);
