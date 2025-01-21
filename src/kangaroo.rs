@@ -23,21 +23,46 @@ pub struct Kangaroo {
     pub table: Table,
 }
 
+/// Defines generated table values.
 #[cfg_attr(feature = "serde", serde_as)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Table {
+    /// A vector of generated Ristretto256 points which are used to get the next point and perform
+    /// further distinguished point checks based on [`slog`] scalars.
+    ///
+    /// [`Table::s_values_init`] is used to fill this value with values.
+    ///
+    /// [`slog`]:Table::slog
     pub s: Vec<RistrettoPoint>,
+
+    /// A vector of generated scalars which are used to get the next point and perform further
+    /// distinguished point checks.
+    ///
+    /// [`Table::s_values_init`] is used to fill this value with values.
     pub slog: Vec<Scalar>,
+
+    /// Generated table map where key - distinguished (see [`is_distinguished`] function)
+    /// Ristretto256 point and value - it's discrete log. Use [`Table::generate`] method to fill
+    /// the table with values.
     #[cfg_attr(feature = "serde", serde_as(as = "Vec<(_, _)>"))]
     pub table: HashMap<CompressedRistretto, Scalar>,
 }
 
+/// Defines constants based on which the algorithm runs.
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Parameters {
+    /// Coefficient to increase [`W`] constant.
+    ///
+    /// [`W`]:Parameters::W
     pub i: u64,
+    /// Number of iterations after which we need to regenerate a new starting point
+    /// (see algorithm definition).
     pub W: u64,
+    /// Size of the generated table.
     pub N: u64,
+    /// Number of elements to be generated for `s` and `slog` vectors of the [`Table`] structure.
     pub R: u64,
+    /// Size of a secret to look for.
     pub secret_size: u8,
 }
 
@@ -72,6 +97,8 @@ fn is_distinguished(compressed_point: &CompressedRistretto, parameters: &Paramet
     (point_bytes & (parameters.W - 1)) == 0
 }
 
+/// Gets a new index from the provided compressed Ristretto point. The index is meant to be used
+/// for retrieving elements from [`Table`] `s` and `slog` vectors.
 fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> u64 {
     let point_bytes = get_last_point_bytes(compressed_point);
 
