@@ -99,6 +99,9 @@ fn is_distinguished(compressed_point: &CompressedRistretto, parameters: &Paramet
 
 /// Gets a new index from the provided compressed Ristretto point. The index is meant to be used
 /// for retrieving elements from [`Table`] `s` and `slog` vectors.
+///
+/// Note: it does not perform hashing. However, in the original reference implementation authors
+/// use exactly the same name.
 fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> u64 {
     let point_bytes = get_last_point_bytes(compressed_point);
 
