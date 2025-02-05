@@ -42,8 +42,8 @@ pub struct Table {
     pub slog: Vec<Scalar>,
 
     /// Generated table map where key - distinguished (see [`is_distinguished`] function)
-    /// Ristretto256 point and value - it's discrete log. Use [`Table::generate`] method to fill
-    /// the table with values.
+    /// Ristretto256 point and its discrete log - it's discrete log. Use [`Table::generate`] method
+    /// to fill the table with values.
     #[cfg_attr(feature = "serde", serde_as(as = "Vec<(_, _)>"))]
     pub table: HashMap<CompressedRistretto, Scalar>,
 }
@@ -101,7 +101,7 @@ fn is_distinguished(compressed_point: &CompressedRistretto, parameters: &Paramet
 /// for retrieving elements from [`Table`] `s` and `slog` vectors.
 ///
 /// Note: it does not perform hashing. However, in the original reference implementation authors
-/// use exactly the same name.
+/// (Daniel J. Bernstein and Tanja Lange) use exactly the same name.
 fn hash(compressed_point: &CompressedRistretto, parameters: &Parameters) -> u64 {
     let point_bytes = get_last_point_bytes(compressed_point);
 
