@@ -2,15 +2,15 @@ use crate::kangaroo::{self, Kangaroo};
 use crate::utils;
 
 use anyhow::{Context, Result};
+use curve25519_dalek_ng::traits::Identity;
 use curve25519_dalek_ng::{constants::RISTRETTO_BASEPOINT_POINT, ristretto::RistrettoPoint};
 use std::ops::{Add, AddAssign, Mul, Sub};
-use curve25519_dalek_ng::traits::Identity;
 use web_time::{Duration, Instant};
 
 impl Kangaroo {
     pub fn solve_dlp(&self, pk: &RistrettoPoint, max_time: Option<u64>) -> Result<Option<u64>> {
         if pk.eq(&RistrettoPoint::identity()) {
-            return Ok(Some(0))
+            return Ok(Some(0));
         }
 
         let start_time = max_time.map(|_| Instant::now());
